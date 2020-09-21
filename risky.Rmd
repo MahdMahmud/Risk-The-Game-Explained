@@ -1,0 +1,80 @@
+---
+title: "Risky Business"
+output: html_document
+---
+
+## Is it worth the risk?
+
+
+Hello,
+
+
+  Have you ever wondered who actually has the advantage in a game of risk? Is it the attacker or the defender. Sure, the attacker gets to roll 3 dice, but all the defender has to do is match the two.
+  
+  
+  I thought about using my knowledge of probability to solve this. But then I realized that would be kind of boring compared to a more computational method. Rather than using probability theory, why not just play the same move 1000 times: where the attacker has 3 dice (and unlimited soldiers) and the defender has 2 fair dice (and unlimited soldiers).
+
+
+```{r,echo = TRUE, results='hide'}
+
+
+n = 1000            #will repeat this game 1000 times 
+
+di <- c(1:6)        #create a vector from 1 to 6 to make a di
+win <- rep(NA, n)   #store win for attacker here
+draw<- rep(NA, n)   #store draws here
+defeat<- rep(NA, n) #store losses for attakcer here
+
+for (i in 1:n) {
+  
+  attacker <- c(sample(di,1),sample(di,1), sample(di,1))
+ 
+  attacker <- sort(attacker, decreasing = T ) #sort by largest to smallest values
+
+  attacker <- attacker[c(1,2)]  #choose largest two values from 3
+ 
+  defender <- c(sample(di,1), sample(di,1))
+  defender <- sort(defender, decreasing  = T)   #order values to match attacker'
+  
+  x_name <- "attacker"   #creating labels for a df; the vectors are attacker and defender rolls
+  y_name <- "defender"
+  
+  risk <- data.frame(attacker,defender)
+  names(risk) <- c(x_name,y_name)
+  
+  risk$attk_win <- ifelse(defender >= attacker, 0,1)  #because I'm dumb, this snippet is somewhat backwrds
+  risk$defe_win <- ifelse(defender < attacker, 0, 1)  #it says, if defender is less than attacker, do nothing, otherwise defender wins 1
+  
+  att_wins <- sum( risk$attk_win ) #count wins for attacker
+  def_wins <- sum( risk$defe_win ) #count wins for defenders
+  
+  if (att_wins==2) {
+    win[i] <- 1
+  } else if (att_wins==1) {
+    draw[i] <- 1
+  }else if (def_wins==2) {
+    defeat[i] <- 1
+  } 
+  
+}
+
+print(sum(win, na.rm = T))
+print(sum(defeat, na.rm = T))
+print(sum(draw, na.rm = T))
+
+
+```
+
+The code above might look long, but its quite straightforward. All it does is repeat 1000 fights between an attacker with 3 dice and a defender with 2. It then counts the results of each fight. There are 3 possible outcomes; attacker kills 2 of the defender's units, defender kills 2 of the attacker's units, or they both lose one. The results are below.
+
+###### Results!
+
+```{r print results,echo=FALSE}
+paste("Attacker wins", sum(win, na.rm = T), "times. The attacker takes two")
+paste("Defender wins", sum(defeat, na.rm = T), "times. Defender takes two.")
+paste("It's a draw", sum(draw, na.rm = T), "times. Both sides lose one.")
+
+paste("And would you look at that, they sum up to an even 1000!")
+```
+#### What's next?
+We can clearly see here that the attacker has the advantage when attacking. If both sides had an equal and large number of units, the attacker would turn out victorious. But would happen if the attacker only uses two dice two attack? Theoretically, the defender should have the better chance of winning. The questions is: by how much?
